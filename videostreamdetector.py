@@ -16,9 +16,10 @@ class VideoStreamDetector:
                  model_weights_path: str,
                  class_to_detect: str,
                  callback: Callable,
-                 rtsp_buff_size: int = 5,
+                 rtsp_buff_size: int = 2,
                  pause_after_detection: timedelta.seconds = 30,
                  video_sequence_length: timedelta.seconds = 5,
+                 restart_time: timedelta.seconds = 60,
                  detection_threshold: float = 0.65,
                  max_detection_count: int = 3,
                  detector_threads: int = 4,
@@ -38,6 +39,7 @@ class VideoStreamDetector:
         self.__class_to_detect = class_to_detect
         self.__pause_after_detection = pause_after_detection
         self.__video_sequence_length = video_sequence_length
+        self.__restart_time = restart_time
         self.__callback = callback
         self.__last_frame_time = datetime.now() - timedelta(days=9999)
         self.__last_recording_frame_time = datetime.now() - timedelta(days=9999)
@@ -49,12 +51,16 @@ class VideoStreamDetector:
 
     def start(self):
         logging.info(f"Connecting to video stream at {self.__rtsp_url}")
+
         # Set up video stream
         video_stream = cv2.VideoCapture(self.__rtsp_url)
         video_stream.set(cv2.CAP_PROP_BUFFERSIZE, self.__rtsp_buff_size)
 
+        # Save the starting time
+        start_time = datetime.now()
+
         # Start the video loop
-        while video_stream.isOpened():
+        while (datetime.now() - start_time).total_seconds() < self.__restart_time or self.__should_record():
             success, frame = video_stream.read()
             if not success:
                 continue
@@ -65,17 +71,13 @@ class VideoStreamDetector:
                 break
 
     def on_frame_received(self, frame: np.array):
-        now = datetime.now()
-        delta_last_detection = (now - self.__last_detection_time).total_seconds()
-        delta_last_frame_processed = (now - self.__last_frame_time).total_seconds()
-
-        if delta_last_detection < self.__video_sequence_length:
+        if self.__should_record():
             self.__record_video(frame)
 
-        elif len(self.__video_buff) > 0:
+        elif self.__has_video_buffer():
             self.__save_video()
 
-        elif delta_last_detection > self.__pause_after_detection and delta_last_frame_processed > self.__processing_fps:
+        elif not self.__in_pause() and self.__can_process():
             frame = self.__detect_objects(frame)
 
         if self.__debug:
@@ -110,3 +112,18 @@ class VideoStreamDetector:
         self.__last_frame_time = datetime.now()
         self.__last_recording_frame_time = datetime.now()
         return frame
+
+    def __should_record(self):
+        delta_last_detection = (datetime.now() - self.__last_detection_time).total_seconds()
+        return delta_last_detection < self.__video_sequence_length
+
+    def __has_video_buffer(self):
+        return len(self.__video_buff) > 0
+
+    def __in_pause(self):
+        delta_last_detection = (datetime.now() - self.__last_detection_time).total_seconds()
+        return delta_last_detection < self.__pause_after_detection
+
+    def __can_process(self):
+        delta_last_frame_processed = (datetime.now() - self.__last_frame_time).total_seconds()
+        return delta_last_frame_processed > self.__processing_fps

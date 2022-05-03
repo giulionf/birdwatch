@@ -22,6 +22,8 @@ if __name__ == "__main__":
                         help="Number of seconds to pause the processing for when an object got detected.")
     parser.add_argument("--video_sequence_length", type=float, default=5,
                         help="Number of seconds to record after an object detection event.")
+    parser.add_argument("--restart_time", type=float, default=60,
+                        help="Number of seconds after which to restart the video stream.")
     parser.add_argument("--detection_threshold", type=float, default=0.65, help="Detection confidence threshold.")
     parser.add_argument("--max_detection_count", type=int, default=3, help="Max object detection count per frame.")
     parser.add_argument("--detector_threads", type=int, default=4, help="Number of CPU threads for the detector.")
@@ -54,6 +56,7 @@ if __name__ == "__main__":
                               callback=send_video_then_delete,
                               pause_after_detection=args.pause_on_detection,
                               video_sequence_length=args.video_sequence_length,
+                              restart_time=args.restart_time,
                               detection_threshold=args.detection_threshold,
                               max_detection_count=args.max_detection_count,
                               detector_threads=args.detector_threads,
