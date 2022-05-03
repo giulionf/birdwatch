@@ -20,7 +20,7 @@ if __name__ == "__main__":
                         help="Number of seconds to pause the processing for when an object got detected.")
     parser.add_argument("--pause_after_processing", type=float, default=1,
                         help="Number of seconds to pause after each processing.")
-    parser.add_argument("--video_sequence_length", type=float, default=5,
+    parser.add_argument("--video_sequence_length", type=float, default=10,
                         help="Number of seconds to record after an object detection event.")
     parser.add_argument("--restart_time", type=float, default=120,
                         help="Number of seconds after which to restart the video stream.")
