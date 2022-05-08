@@ -1,4 +1,6 @@
 
+# Example result
+![](https://github.com/giulionf/birdwatch/blob/main/readme/demo.gif)
 
 # Getting Started
 ## Creating a email sender

@@ -26,7 +26,7 @@ class StreamRecorder:
 
         self.__buffer.append(frame)
         n_remove = max(0, len(self.__buffer) - self.__max_pre_event_frames)
-        self.__buffer = self.__buffer[n_remove:]
+        self.__buffer = self.__buffer[int(n_remove):]
         logging.info(f"Recording Video Frame. Buffer size: {len(self.__buffer)}")
 
     def start_recording(self):
