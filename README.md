@@ -3,8 +3,8 @@
 ![](https://github.com/giulionf/birdwatch/blob/main/readme/demo.gif)
 
 # Getting Started
-## Creating a email sender
-1. Create a Googlemail Account
+## Creating an email account
+1. Create a (Google-)mail Account
 2. Enable insecure Apps under https://www.google.com/settings/security/lesssecureapps
 
 ## Setting up the environment
